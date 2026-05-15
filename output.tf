@@ -1,0 +1,39 @@
+output "aws_caller_identity_account_id" {
+  description = "AWS Account ID"
+  value       = data.aws_caller_identity.current.account_id
+}
+
+output "aws_caller_identity_user_arn" {
+  description = "ARN of the AWS user/role"
+  value       = data.aws_caller_identity.current.arn
+}
+
+output "ubuntu_ami_id" {
+  description = "Ubuntu AMI ID used for the instance"
+  value       = data.aws_ami.ubuntu.id
+}
+
+output "ubuntu_ami_name" {
+  description = "Ubuntu AMI name"
+  value       = data.aws_ami.ubuntu.name
+}
+
+output "instance_id" {
+  description = "EC2 Instance ID"
+  value       = aws_instance.cloud-1.id
+}
+
+output "instance_arn" {
+  description = "EC2 Instance ARN"
+  value       = aws_instance.cloud-1.arn
+}
+
+output "instance_public_ip" {
+  description = "Public IP address of the instance"
+  value       = aws_instance.cloud-1.public_ip
+}
+
+output "instance_private_ip" {
+  description = "Private IP address of the instance"
+  value       = aws_instance.cloud-1.private_ip
+}
