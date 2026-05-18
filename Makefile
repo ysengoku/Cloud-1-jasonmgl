@@ -1,14 +1,12 @@
 re: clean up
 
 up:
-	terraform init && \
-	terraform validate && \
-	terraform plan && \
-	terraform apply -auto-approve
+	./scripts/install.sh
+	./scripts/login_aws.sh
+	./scripts/init_terraform.sh
 
 clean:
-	terraform destroy -auto-approve
-	rm -rf .terraform* terraform.tfstate*
+	./scripts/uninstall.sh
 
 help:
 	@tail -n 1 ./Makefile |  sed -e 's/.PHONY:/Commands:/g'
