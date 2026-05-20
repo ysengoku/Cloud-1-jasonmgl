@@ -11,6 +11,11 @@ terraform {
       version = "~> 2.5"
     }
 
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0"
+    }
+
     ansible = {
       source  = "ansible/ansible"
       version = "~> 1.3"

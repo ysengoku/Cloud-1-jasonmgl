@@ -8,8 +8,9 @@ if command aws -v >/dev/null 2>&1; then
     sudo rm -rf /usr/local/aws-cli
 fi
 
-if command terraform -v >/dev/null 2>&1; then
-    terraform destroy -auto-approve
+if command mise exec terraform@latest -- terraform -v >/dev/null 2>&1; then
+    mise exec terraform@latest -- terraform init
+    mise exec terraform@latest -- terraform destroy -auto-approve
 fi
 rm -rf .terraform* terraform.tfstate*
 

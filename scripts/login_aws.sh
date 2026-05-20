@@ -23,13 +23,6 @@ EOF
 aws_access_key_id = ${AWS_ACCESS_KEY_ID}
 aws_secret_access_key = ${AWS_SECRET_ACCESS_KEY}
 EOF
-
-    aws ec2 create-key-pair \                                                                            --key-name key \
-    --key-type rsa \
-    --key-format pem \
-    --query "KeyMaterial" \
-    --output text > $aws_dir/key.pem
-    
-    chmod 600 "$aws_dir/config" "$aws_dir/credentials" $aws_dir/key.pem
+    chmod 600 "$aws_dir/config" "$aws_dir/credentials"
 fi
 

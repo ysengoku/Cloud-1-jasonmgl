@@ -59,7 +59,7 @@ known_hosts
 # ============================================================
 
 .terraform/
-.terraform/*
+.terraform*
 terraform.tfstate
 terraform.tfstate.*
 terraform.tfvars

@@ -2,9 +2,7 @@
 
 set -euo pipefail
 
-terraform version
-
-terraform init
-terraform validate
-terraform plan
-terraform apply -auto-approve
+mise exec terraform@latest -- terraform init
+mise exec terraform@latest -- terraform validate
+mise exec terraform@latest -- terraform plan
+mise exec terraform@latest -- terraform apply -auto-approve
