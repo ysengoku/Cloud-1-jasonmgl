@@ -12,7 +12,7 @@ locals {
   #! /bin/bash
   
   sudo apt update -y
-  sudo apt install python3
+  sudo apt install -y python3
   EOF
 
   security_group_ingress_rules = {
@@ -58,7 +58,7 @@ resource "aws_instance" "instances" {
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = var.instance_type
   key_name               = aws_key_pair.nb-keypair.key_name
-  vpc_security_group_ids = [aws_security_group.instance_ssh[each.key].id]
+  vpc_security_group_ids = [aws_security_group.instance_ssh.id]
   user_data              = local.instance_user_data
 
   tags = {
@@ -66,21 +66,32 @@ resource "aws_instance" "instances" {
   }
 }
 
-resource "aws_security_group" "instance_ssh" {
-  for_each = local.instances
+resource "aws_eip" "instances" {
+  for_each = aws_instance.instances
 
-  name        = "${each.value.name}-ssh"
-  description = "Allow SSH access to the EC2 instance ${each.key}"
+  domain   = "vpc"
+  instance = each.value.id
+
+  tags = {
+    Name = "${local.instances[each.key].name}-eip"
+  }
+}
+
+resource "aws_security_group" "instance_ssh" {
+
+  name        = "custom_security_group-ssh"
+  description = "Allow SSH, HTTP, and HTTPS access to the EC2 instances"
 
   dynamic "ingress" {
     for_each = local.security_group_ingress_rules
+    iterator = rule
 
     content {
-      description = ingress.value.description
-      from_port   = ingress.value.from_port
-      to_port     = ingress.value.to_port
+      description = rule.value.description
+      from_port   = rule.value.from_port
+      to_port     = rule.value.to_port
       protocol    = "tcp"
-      cidr_blocks = ingress.value.cidr_blocks
+      cidr_blocks = rule.value.cidr_blocks
     }
   }
 
@@ -93,7 +104,7 @@ resource "aws_security_group" "instance_ssh" {
   }
 
   tags = {
-    Name = "${each.value.name}-ssh"
+    Name = "custom_security_group-ssh"
   }
 }
 
@@ -120,7 +131,7 @@ resource "local_file" "ansible_inventory" {
 [aws]
 ${join("\n", [
   for key, instance in aws_instance.instances :
-  "${local.instances[key].name} ansible_host=${instance.public_ip} ansible_ssh_private_key_file=${local.ansible_ssh_private_key_file} ansible_ssh_user=${var.ansible_ssh_user}"
+  "${local.instances[key].name} ansible_host=${aws_eip.instances[key].public_ip} ansible_ssh_private_key_file=${local.ansible_ssh_private_key_file} ansible_ssh_user=${var.ansible_ssh_user}"
 ])}
 EOT
 }

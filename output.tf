@@ -33,9 +33,16 @@ output "instance_arns" {
 }
 
 output "instance_public_ips" {
-  description = "Public IP addresses by instance key"
+  description = "Elastic public IP addresses by instance key"
   value = {
-    for key, instance in aws_instance.instances : key => instance.public_ip
+    for key, eip in aws_eip.instances : key => eip.public_ip
+  }
+}
+
+output "instance_elastic_ip_allocation_ids" {
+  description = "Elastic IP allocation IDs by instance key"
+  value = {
+    for key, eip in aws_eip.instances : key => eip.allocation_id
   }
 }
 
@@ -54,7 +61,7 @@ output "ssh_private_key_path" {
 output "ssh_commands" {
   description = "Commands to connect to the EC2 instances over SSH"
   value = {
-    for key, instance in aws_instance.instances :
-    key => "ssh -i ${local.ansible_ssh_private_key_file} ${var.ansible_ssh_user}@${instance.public_ip}"
+    for key, eip in aws_eip.instances :
+    key => "ssh -i ${local.ansible_ssh_private_key_file} ${var.ansible_ssh_user}@${eip.public_ip}"
   }
 }
