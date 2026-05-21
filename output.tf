@@ -18,24 +18,32 @@ output "ubuntu_ami_name" {
   value       = data.aws_ami.ubuntu.name
 }
 
-output "instance_id" {
-  description = "EC2 Instance ID"
-  value       = aws_instance.cloud-1.id
+output "instance_ids" {
+  description = "EC2 instance IDs by instance key"
+  value = {
+    for key, instance in aws_instance.instances : key => instance.id
+  }
 }
 
-output "instance_arn" {
-  description = "EC2 Instance ARN"
-  value       = aws_instance.cloud-1.arn
+output "instance_arns" {
+  description = "EC2 instance ARNs by instance key"
+  value = {
+    for key, instance in aws_instance.instances : key => instance.arn
+  }
 }
 
-output "instance_public_ip" {
-  description = "Public IP address of the instance"
-  value       = aws_instance.cloud-1.public_ip
+output "instance_public_ips" {
+  description = "Public IP addresses by instance key"
+  value = {
+    for key, instance in aws_instance.instances : key => instance.public_ip
+  }
 }
 
-output "instance_private_ip" {
-  description = "Private IP address of the instance"
-  value       = aws_instance.cloud-1.private_ip
+output "instance_private_ips" {
+  description = "Private IP addresses by instance key"
+  value = {
+    for key, instance in aws_instance.instances : key => instance.private_ip
+  }
 }
 
 output "ssh_private_key_path" {
@@ -43,7 +51,10 @@ output "ssh_private_key_path" {
   value       = local.ansible_ssh_private_key_file
 }
 
-output "ssh_command" {
-  description = "Command to connect to the EC2 instance over SSH"
-  value       = "ssh -i ${local.ansible_ssh_private_key_file} ${var.ansible_ssh_user}@${aws_instance.cloud-1.public_ip}"
+output "ssh_commands" {
+  description = "Commands to connect to the EC2 instances over SSH"
+  value = {
+    for key, instance in aws_instance.instances :
+    key => "ssh -i ${local.ansible_ssh_private_key_file} ${var.ansible_ssh_user}@${instance.public_ip}"
+  }
 }

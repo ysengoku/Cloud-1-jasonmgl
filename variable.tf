@@ -4,10 +4,19 @@ variable "aws_region" {
   default     = "eu-west-3"
 }
 
-variable "instance_name" {
-  description = "Name tag for the EC2 instance"
-  type        = string
-  default     = "cloud-1"
+variable "instances" {
+  description = "EC2 instances to create"
+  type = map(object({
+    name = optional(string)
+  }))
+  default = {
+    "1" = {
+      name = "instance-1"
+    }
+    "2" = {
+      name = "instance-2"
+    }
+  }
 }
 
 variable "instance_type" {
@@ -19,13 +28,13 @@ variable "instance_type" {
 variable "key_pair_name" {
   description = "Name of the AWS EC2 key pair created by Terraform"
   type        = string
-  default     = "cloud-1-key"
+  default     = "default-key"
 }
 
 variable "ssh_private_key_path" {
   description = "Local path where Terraform writes the generated SSH private key"
   type        = string
-  default     = "~/.aws/cloud-1"
+  default     = "~/.aws/default"
 }
 
 variable "ssh_allowed_cidr" {

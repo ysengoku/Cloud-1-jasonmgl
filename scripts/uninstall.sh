@@ -20,6 +20,6 @@ fi
 
 
 if command mise -v >/dev/null 2>&1; then
-    mise uninstall terraform -y
+    mise uninstall terraform -y --all
     mise implode -y
 fi
