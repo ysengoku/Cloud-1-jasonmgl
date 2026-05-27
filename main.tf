@@ -2,13 +2,28 @@ data "aws_caller_identity" "current" {}
 
 locals {
   ansible_ssh_private_key_file = pathexpand(var.ssh_private_key_path)
-  instances = {
-    for key, instance in var.instances : key => {
-      name = coalesce(instance.name, key)
+  instance_groups = {
+    for group_key, group in var.instance_groups : group_key => {
+      name = coalesce(group.name, group_key)
+      instances = {
+        for instance_key, instance in group.instances : instance_key => {
+          name = coalesce(instance.name, "${coalesce(group.name, group_key)}-${instance_key}")
+        }
+      }
     }
   }
+  instances = merge([
+    for group_key, group in local.instance_groups : {
+      for instance_key, instance in group.instances : "${group_key}.${instance_key}" => {
+        group_key    = group_key
+        group_name   = group.name
+        instance_key = instance_key
+        name         = instance.name
+      }
+    }
+  ]...)
 
-  instance_user_data           = <<EOF
+  instance_user_data = <<EOF
   #! /bin/bash
   
   sudo apt update -y
@@ -58,11 +73,12 @@ resource "aws_instance" "instances" {
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = var.instance_type
   key_name               = aws_key_pair.nb-keypair.key_name
-  vpc_security_group_ids = [aws_security_group.instance_ssh.id]
+  vpc_security_group_ids = [aws_security_group.instance_groups[each.value.group_key].id]
   user_data              = local.instance_user_data
 
   tags = {
-    Name = each.value.name
+    Group = each.value.group_name
+    Name  = each.value.name
   }
 }
 
@@ -77,10 +93,11 @@ resource "aws_eip" "instances" {
   }
 }
 
-resource "aws_security_group" "instance_ssh" {
+resource "aws_security_group" "instance_groups" {
+  for_each = local.instance_groups
 
-  name        = "custom_security_group-ssh"
-  description = "Allow SSH, HTTP, and HTTPS access to the EC2 instances"
+  name        = "custom-security-group-${each.key}"
+  description = "Allow SSH, HTTP, and HTTPS access to the ${each.value.name} EC2 instances"
 
   dynamic "ingress" {
     for_each = local.security_group_ingress_rules
@@ -104,8 +121,20 @@ resource "aws_security_group" "instance_ssh" {
   }
 
   tags = {
-    Name = "custom_security_group-ssh"
+    Name = "${each.value.name}-security-group"
   }
+}
+
+resource "aws_key_pair" "nb-keypair" {
+  key_name   = var.key_pair_name
+  public_key = tls_private_key.nb-keypair.public_key_openssh
+}
+
+resource "aws_ec2_instance_state" "instances" {
+  for_each = aws_instance.instances
+
+  instance_id = each.value.id
+  state       = var.instance_power_state
 }
 
 resource "tls_private_key" "nb-keypair" {
@@ -119,19 +148,22 @@ resource "local_sensitive_file" "private_key" {
   file_permission = "0600"
 }
 
-resource "aws_key_pair" "nb-keypair" {
-  key_name   = var.key_pair_name
-  public_key = tls_private_key.nb-keypair.public_key_openssh
-}
-
 resource "local_file" "ansible_inventory" {
   filename = "${path.module}/inventory.ini"
 
-  content = <<-EOT
-[aws]
-${join("\n", [
-  for key, instance in aws_instance.instances :
-  "${local.instances[key].name} ansible_host=${aws_eip.instances[key].public_ip} ansible_ssh_private_key_file=${local.ansible_ssh_private_key_file} ansible_ssh_user=${var.ansible_ssh_user}"
-])}
-EOT
+  content = join("\n\n", concat(
+    [
+      "[aws]\n${join("\n", [
+        for key, instance in aws_instance.instances :
+        "${local.instances[key].name} ansible_host=${aws_eip.instances[key].public_ip} ansible_ssh_private_key_file=${local.ansible_ssh_private_key_file} ansible_ssh_user=${var.ansible_ssh_user}"
+      ])}"
+    ],
+    [
+      for group_key, group in local.instance_groups :
+      "[${group_key}]\n${join("\n", [
+        for instance_key, instance in group.instances :
+        "${instance.name} ansible_host=${aws_eip.instances["${group_key}.${instance_key}"].public_ip} ansible_ssh_private_key_file=${local.ansible_ssh_private_key_file} ansible_ssh_user=${var.ansible_ssh_user}"
+      ])}"
+    ]
+  ))
 }

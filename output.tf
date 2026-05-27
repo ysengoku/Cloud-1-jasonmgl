@@ -19,37 +19,60 @@ output "ubuntu_ami_name" {
 }
 
 output "instance_ids" {
-  description = "EC2 instance IDs by instance key"
+  description = "EC2 instance IDs by group and instance key"
   value = {
-    for key, instance in aws_instance.instances : key => instance.id
+    for group_key, group in local.instance_groups : group_key => {
+      for instance_key, instance in group.instances :
+      instance_key => aws_instance.instances["${group_key}.${instance_key}"].id
+    }
   }
 }
 
 output "instance_arns" {
-  description = "EC2 instance ARNs by instance key"
+  description = "EC2 instance ARNs by group and instance key"
   value = {
-    for key, instance in aws_instance.instances : key => instance.arn
+    for group_key, group in local.instance_groups : group_key => {
+      for instance_key, instance in group.instances :
+      instance_key => aws_instance.instances["${group_key}.${instance_key}"].arn
+    }
   }
 }
 
 output "instance_public_ips" {
-  description = "Elastic public IP addresses by instance key"
+  description = "Elastic public IP addresses by group and instance key"
   value = {
-    for key, eip in aws_eip.instances : key => eip.public_ip
+    for group_key, group in local.instance_groups : group_key => {
+      for instance_key, instance in group.instances :
+      instance_key => aws_eip.instances["${group_key}.${instance_key}"].public_ip
+    }
   }
 }
 
 output "instance_elastic_ip_allocation_ids" {
-  description = "Elastic IP allocation IDs by instance key"
+  description = "Elastic IP allocation IDs by group and instance key"
   value = {
-    for key, eip in aws_eip.instances : key => eip.allocation_id
+    for group_key, group in local.instance_groups : group_key => {
+      for instance_key, instance in group.instances :
+      instance_key => aws_eip.instances["${group_key}.${instance_key}"].allocation_id
+    }
   }
 }
 
 output "instance_private_ips" {
-  description = "Private IP addresses by instance key"
+  description = "Private IP addresses by group and instance key"
   value = {
-    for key, instance in aws_instance.instances : key => instance.private_ip
+    for group_key, group in local.instance_groups : group_key => {
+      for instance_key, instance in group.instances :
+      instance_key => aws_instance.instances["${group_key}.${instance_key}"].private_ip
+    }
+  }
+}
+
+output "security_group_ids" {
+  description = "Security group IDs by group key"
+  value = {
+    for group_key, security_group in aws_security_group.instance_groups :
+    group_key => security_group.id
   }
 }
 
@@ -59,9 +82,11 @@ output "ssh_private_key_path" {
 }
 
 output "ssh_commands" {
-  description = "Commands to connect to the EC2 instances over SSH"
+  description = "Commands to connect to the EC2 instances over SSH by group and instance key"
   value = {
-    for key, eip in aws_eip.instances :
-    key => "ssh -i ${local.ansible_ssh_private_key_file} ${var.ansible_ssh_user}@${eip.public_ip}"
+    for group_key, group in local.instance_groups : group_key => {
+      for instance_key, instance in group.instances :
+      instance_key => "ssh -i ${local.ansible_ssh_private_key_file} ${var.ansible_ssh_user}@${aws_eip.instances["${group_key}.${instance_key}"].public_ip}"
+    }
   }
 }

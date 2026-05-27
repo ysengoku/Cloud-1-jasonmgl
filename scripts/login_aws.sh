@@ -1,9 +1,19 @@
-#! /bin/bash
+#! /usr/bin/env bash
+
+if [[ -t 1 ]]; then
+    RED=$'\e[31m'
+    GREEN=$'\e[32m'
+    ENDCOLOR=$'\e[0m'
+else
+    RED=''
+    GREEN=''
+    ENDCOLOR=''
+fi
 
 set -euo pipefail
 
 if [ ! -f ".env" ]; then
-    echo "No .env found for this project."
+    printf '%s\n' "${RED}No .env found for this project${ENDCOLOR}"
     exit 1
 else
     source .env >/dev/null 2>&1
@@ -26,3 +36,5 @@ EOF
     chmod 600 "$aws_dir/config" "$aws_dir/credentials"
 fi
 
+printf '%s\n' "${GREEN}Successfully connected to AWS CLI${ENDCOLOR}"
+sleep 1
