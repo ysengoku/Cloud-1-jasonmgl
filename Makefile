@@ -7,17 +7,17 @@ up:
 	./scripts/init_ansible.sh
 
 down:
-	mise exec -- terraform apply -auto-approve -invoke=action.aws_ec2_stop_instance.force_stop
+	mise exec -- terraform -chdir=terraform apply -auto-approve -invoke=action.aws_ec2_stop_instance.force_stop
 
 clean:
-	rm -f inventory.*
+	rm -f ansible/inventory.ini ansible/inventory.yaml
 
 fclean: clean
 	./scripts/uninstall.sh
-	rm -rf .terraform* terraform.tfstate*
+	rm -rf terraform/.terraform* terraform/terraform.tfstate*
 
 test:
-	ansible aws -m ping -i inventory.yaml
+	ANSIBLE_CONFIG=ansible/ansible.cfg ansible aws -m ping -i ansible/inventory.yaml
 
 help:
 	@tail -n 1 ./Makefile |  sed -e 's/.PHONY:/Commands:/g'

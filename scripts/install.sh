@@ -36,7 +36,7 @@ mise version -y
 if ! command -v terraform >/dev/null 2>&1; then
     mise use --global terraform@latest
 fi
-mise exec terraform@latest -- terraform version
+mise exec terraform@latest -- terraform -chdir=terraform version
 
 printf '%s\n' "${GREEN}All binary files have been successfully installed${ENDCOLOR}"
 sleep 1

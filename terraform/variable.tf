@@ -13,19 +13,11 @@ variable "instance_groups" {
     }))
   }))
   default = {
-    web = {
-      name = "web"
+    app = {
+      name = "app"
       instances = {
         "1" = {
-          name = "web-1"
-        }
-      }
-    }
-    db = {
-      name = "db"
-      instances = {
-        "1" = {
-          name = "db-1"
+          name = "app-1"
         }
       }
     }
@@ -78,4 +70,10 @@ variable "ansible_ssh_user" {
   description = "SSH user used by Ansible to connect to the instance"
   type        = string
   default     = "ubuntu"
+}
+
+variable "inventory_ansible_path" {
+  description = "Path for inventory.ini needed by Ansible to connect to instances from SSH"
+  type        = string
+  default     = null
 }

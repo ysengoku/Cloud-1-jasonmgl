@@ -12,6 +12,5 @@ fi
 
 set -euo pipefail
 
-ansible-inventory -i inventory.ini --list --yaml > inventory.yaml
-ansible aws -m ping -i inventory.yaml
-ansible-galaxy install -r requirements.yml
+ANSIBLE_CONFIG=ansible/ansible.cfg ansible-inventory -i ansible/inventory.ini --list --yaml > ansible/inventory.yaml
+ansible-galaxy install -r ansible/requirements.yml

@@ -2,6 +2,7 @@ data "aws_caller_identity" "current" {}
 
 locals {
   ansible_ssh_private_key_file = pathexpand(var.ssh_private_key_path)
+  inventory_ansible_path       = coalesce(var.inventory_ansible_path, "${path.module}/../ansible/inventory.ini")
   instance_groups = {
     for group_key, group in var.instance_groups : group_key => {
       name = coalesce(group.name, group_key)
@@ -149,7 +150,7 @@ resource "local_sensitive_file" "private_key" {
 }
 
 resource "local_file" "ansible_inventory" {
-  filename = "${path.module}/inventory.ini"
+  filename = local.inventory_ansible_path
 
   content = join("\n\n", concat(
     [

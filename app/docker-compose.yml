@@ -1,0 +1,76 @@
+services:
+  mariadb:
+    image: docker pull dhi.io/mariadb:12-debian13-dev
+    container_name: mariadb
+    env_file:
+      - .env
+    volumes:
+      - mariadb:/var/lib/mysql
+    expose:
+      - 3306
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$${MARIADB_ROOT_PASSWORD} --silent"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    networks:
+      - docker-network
+    restart: always
+  nginx:
+    image: dhi.io/nginx:1-debian13-dev
+    container_name: nginx
+    depends_on:
+      wordpress:
+        condition: service_healthy
+    env_file:
+      - .env
+    volumes:
+      - wordpress:/var/www/html
+    ports:
+      - 443:443
+    networks:
+      - docker-network
+    restart: always
+  wordpress:
+    image: dhi.io/wordpress:6.9.4-debian1
+    container_name: wordpress
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      - WORDPRESS_DB_HOST=${MARIADB_HOST}
+      - WORDPRESS_DB_NAME=${MARIADB_NAME}
+      - WORDPRESS_DB_USER=${MARIADB_USER}
+      - WORDPRESS_DB_PASSWORD=${MARIADB_USER_PASSWORD}
+    volumes:
+      - wordpress:/var/www/html
+    expose:
+      - 9000
+    healthcheck:
+      test: ["CMD-SHELL", "php -r 'exit(@fsockopen(\"127.0.0.1\", 9000) ? 0 : 1);'"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    networks:
+      - docker-network
+    restart: always
+
+volumes:
+  wordpress:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /inception/data/wp
+  mariadb:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /inception/data/db
+
+networks:
+  docker-network:
+    driver: bridge

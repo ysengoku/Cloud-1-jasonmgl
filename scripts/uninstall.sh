@@ -19,7 +19,7 @@ if command aws -v >/dev/null 2>&1; then
 fi
 
 if command mise exec terraform@latest -- terraform -v >/dev/null 2>&1; then
-    mise exec terraform@latest -- terraform destroy -auto-approve
+    mise exec terraform@latest -- terraform -chdir=terraform destroy -auto-approve
 fi
 
 if command ansible -v >/dev/null 2>&1; then

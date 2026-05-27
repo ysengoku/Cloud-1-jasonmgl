@@ -12,8 +12,8 @@ fi
 
 set -euo pipefail
 
-mise exec terraform@latest -- terraform init
-mise exec terraform@latest -- terraform validate
-mise exec terraform@latest -- terraform plan
-mise exec terraform@latest -- terraform fmt -recursive
-mise exec terraform@latest -- terraform apply -auto-approve
+mise exec terraform@latest -- terraform -chdir=terraform init
+mise exec terraform@latest -- terraform -chdir=terraform validate
+mise exec terraform@latest -- terraform -chdir=terraform plan
+mise exec terraform@latest -- terraform -chdir=terraform fmt -recursive
+mise exec terraform@latest -- terraform -chdir=terraform apply -auto-approve
