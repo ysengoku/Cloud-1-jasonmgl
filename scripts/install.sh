@@ -25,6 +25,8 @@ fi
 if ! command -v ansible >/dev/null 2>&1; then
     pipx install --include-deps ansible
     pipx install --include-deps ansible-lint
+    printf '%s\n' "${RED}ANSIBLE LINT installed${ENDCOLOR}"
+    sleep 1
 fi
 ansible --version
 

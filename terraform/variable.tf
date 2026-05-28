@@ -13,11 +13,11 @@ variable "instance_groups" {
     }))
   }))
   default = {
-    app = {
-      name = "app"
+    web = {
+      name = "web"
       instances = {
         "1" = {
-          name = "app-1"
+          name = "web-1"
         }
       }
     }

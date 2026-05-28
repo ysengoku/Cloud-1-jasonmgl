@@ -153,6 +153,7 @@ helmfile.lock
 # ============================================================
 
 .aws/
+aws/
 azureProfile.json
 .azure/
 .gcloud/

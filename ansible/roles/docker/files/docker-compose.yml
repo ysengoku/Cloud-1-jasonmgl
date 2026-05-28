@@ -1,15 +1,15 @@
 services:
-  mariadb:
-    image: docker pull dhi.io/mariadb:12-debian13-dev
-    container_name: mariadb
+  mysql:
+    image: docker pull dhi.io/mysql:9-debian13-dev
+    container_name: mysql
     env_file:
       - .env
     volumes:
-      - mariadb:/var/lib/mysql
+      - mysql:/var/lib/mysql
     expose:
       - 3306
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$${MARIADB_ROOT_PASSWORD} --silent"]
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$${MYSQL_ROOT_PASSWORD} --silent"]
       interval: 5s
       timeout: 3s
       retries: 30
@@ -35,15 +35,15 @@ services:
     image: dhi.io/wordpress:6.9.4-debian1
     container_name: wordpress
     depends_on:
-      mariadb:
+      mysql:
         condition: service_healthy
     env_file:
       - .env
     environment:
-      - WORDPRESS_DB_HOST=${MARIADB_HOST}
-      - WORDPRESS_DB_NAME=${MARIADB_NAME}
-      - WORDPRESS_DB_USER=${MARIADB_USER}
-      - WORDPRESS_DB_PASSWORD=${MARIADB_USER_PASSWORD}
+      - WORDPRESS_DB_HOST=${MYSQL_HOST}
+      - WORDPRESS_DB_NAME=${MYSQL_NAME}
+      - WORDPRESS_DB_USER=${MYSQL_USER}
+      - WORDPRESS_DB_PASSWORD=${MYSQL_USER_PASSWORD}
     volumes:
       - wordpress:/var/www/html
     expose:
@@ -63,13 +63,13 @@ volumes:
     driver_opts:
       o: bind
       type: none
-      device: /inception/data/wp
-  mariadb:
+      device: /cloud-1/data/wp
+  mysql:
     driver: local
     driver_opts:
       o: bind
       type: none
-      device: /inception/data/db
+      device: /cloud-1/data/db
 
 networks:
   docker-network:
