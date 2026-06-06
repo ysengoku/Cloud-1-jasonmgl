@@ -1,12 +1,6 @@
 ---
-- name: Déployer nginx
+- name: Deploy Docker stack
   hosts: web
   become: true
-  tasks:
-    - ansible.builtin.apt:
-        name: nginx
-        state: present
-    - ansible.builtin.systemd:
-        name: nginx
-        state: started
-        enabled: true
+  roles:
+    - docker

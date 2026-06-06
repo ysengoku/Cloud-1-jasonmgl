@@ -15,13 +15,13 @@ clean:
 
 fclean: clean
 	./scripts/uninstall.sh
-	rm -rf terraform/.terraform* terraform/terraform.tfstate*
+	rm -rf terraform/.terraform* terraform/terraform.tfstate* .ansible/
 
 test:
 	ANSIBLE_CONFIG=ansible/ansible.cfg ansible aws -m ping
 
-# provision:
-# 	ANSIBLE_CONFIG=ansible/ansible.cfg ansible-playbook <playbook>
+provision:
+	ANSIBLE_CONFIG=ansible/ansible.cfg ansible-playbook -i ansible/inventory.yaml ansible/playbook.yml
 
 help:
 	@tail -n 1 ./Makefile |  sed -e 's/.PHONY:/Commands:/g'

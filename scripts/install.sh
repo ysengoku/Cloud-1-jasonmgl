@@ -20,13 +20,11 @@ if ! command -v aws >/dev/null 2>&1;then
     curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
     unzip awscliv2.zip
     sudo ./aws/install
+    rm -rf aws/ aws*.zip
 fi
 
 if ! command -v ansible >/dev/null 2>&1; then
     pipx install --include-deps ansible
-    pipx install --include-deps ansible-lint
-    printf '%s\n' "${RED}ANSIBLE LINT installed${ENDCOLOR}"
-    sleep 1
 fi
 ansible --version
 

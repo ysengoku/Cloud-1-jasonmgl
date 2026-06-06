@@ -13,5 +13,6 @@ fi
 set -euo pipefail
 
 ANSIBLE_CONFIG=ansible/ansible.cfg ansible-inventory -i ansible/inventory.ini --list --yaml > ansible/inventory.yaml
-ANSIBLE_CONFIG=ansible/ansible.cfg ansible-galaxy install -r ansible/requirements.yml
-ANSIBLE_CONFIG=ansible/ansible.cfg ansible-lint --profile=production
+
+ANSIBLE_ROLES_PATH=ansible/roles ANSIBLE_CONFIG=ansible/ansible.cfg ansible-playbook ansible/playbook.yml --syntax-check
+ANSIBLE_ROLES_PATH=ansible/roles ANSIBLE_CONFIG=ansible/ansible.cfg ansible-playbook ansible/playbook.yml
