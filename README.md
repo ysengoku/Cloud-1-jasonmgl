@@ -202,6 +202,7 @@ Expected result:
 
 - `make fclean` destroys the AWS infrastructure and uninstalls the local tools `make up` installed. Use with caution.
 - With a bare IP (no domain configured), the certificate is self-signed and browsers will show a warning on first visit.
+- Let's Encrypt limits new certificates to 5 per exact domain name within a rolling 7-day window, shared across every request for that domain, not per Cloudflare account or IP. Repeated testing, or multiple people deploying against the same `domain_name`, can hit this limit quickly. Set your own subdomain in `domain_name` (e.g. `cloud1-yourname.example.com`) under the same `cloudflare_zone_name` to avoid sharing the quota with others.
 
 ## Project Structure
 
